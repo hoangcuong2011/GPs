@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as pl
 
 # Test data
-n = 40
+n = 120
 Xtest = np.linspace(-5, 5, n).reshape(-1,1)
 
 # Define the kernel function
@@ -12,7 +12,7 @@ def MyModifiedSquaredExponentialKernel(a, b, param):
 	sqdist = (np.sum(a, 1).reshape(-1,1) - np.sum(b,1))**2
 	return np.exp(-.5 * (1/param) * sqdist)
 
-param = 0.1
+param = 1
 K_testtest = MyModifiedSquaredExponentialKernel(Xtest, Xtest, param)
 
 # Get cholesky decomposition (square root) of the
@@ -20,7 +20,8 @@ K_testtest = MyModifiedSquaredExponentialKernel(Xtest, Xtest, param)
 # L = np.linalg.cholesky(K_testtest + 1e-15*np.eye(n))
 
 # Noiseless training data
-Xtrain = np.array([Xtest[3], Xtest[5], Xtest[11]]).reshape(-1,1)
+
+Xtrain = np.linspace(-5, 5, n/10).reshape(-1,1)
 ytrain = np.sin(Xtrain)
 
 # Apply the kernel function to our training points
@@ -50,12 +51,10 @@ mu = np.dot(Lk.T, np.linalg.solve(L_traintrain, ytrain)).reshape((n,))
 #print(ytrain.shape)
 
 #mu_2 = np.dot(K_traintest, np.linalg.solve(K_traintrain, ytrain))
-mu_2 = np.dot(K_traintest.T, np.linalg.inv(K_traintrain))
-#print(mu_2.shape)
-mu_2 = np.dot(mu_2, ytrain)
+mu = np.dot(np.dot(K_testtrain, np.linalg.inv(K_traintrain)), ytrain)
 
 # print((np.dot(K_traintest.T, np.linalg.inv(K_traintrain))).shape)
-SIGMA = K_testtest - np.dot(np.dot(K_traintest.T, np.linalg.inv(K_traintrain)), K_testtrain.T)
+SIGMA = K_testtest - np.dot(np.dot(K_testtrain, np.linalg.inv(K_traintrain)), K_testtrain.T)
 # print(SIGMA.shape)
 #print(K_testtest.shape)
 # print(mu_2)
@@ -66,7 +65,7 @@ SIGMA = K_testtest - np.dot(np.dot(K_traintest.T, np.linalg.inv(K_traintrain)), 
 # stdv = np.sqrt(s2)
 # Draw samples from the posterior at our test points.
 L = np.linalg.cholesky(SIGMA + 1e-6*np.eye(n))
-f_post = mu_2.reshape(-1,1) + np.dot(L, np.random.normal(size=(n,30)))
+f_post = mu.reshape(-1,1) + np.dot(L, np.random.normal(size=(n,1000)))
 
 pl.plot(Xtrain, ytrain, 'bs', ms=8)
 pl.plot(Xtest, f_post)
