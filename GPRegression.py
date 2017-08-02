@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as pl
 
 # Test data
-n = 120
+n = 1200
 Xtest = np.linspace(-5, 5, n).reshape(-1,1)
 
 # Define the kernel function
@@ -24,8 +24,8 @@ K_testtest = MyModifiedSquaredExponentialKernel(Xtest, Xtest, param)
 Xtrain = np.linspace(-5, 5, n/10).reshape(-1,1)
 ytrain = np.sin(Xtrain)
 
-# Apply the kernel function to our training points
-K_traintrain = MyModifiedSquaredExponentialKernel(Xtrain, Xtrain, param)
+# Apply the kernel function to our training points - note we plus some noise to make sure K_traintrain positive definite
+K_traintrain = MyModifiedSquaredExponentialKernel(Xtrain, Xtrain, param)+ 0.0001 * np.eye(len(ytrain))
 
 #L L^T = K_traintrain
 L_traintrain = np.linalg.cholesky(K_traintrain + 0.00005*np.eye(len(Xtrain)))
